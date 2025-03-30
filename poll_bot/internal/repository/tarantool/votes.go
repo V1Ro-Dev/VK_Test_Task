@@ -48,7 +48,8 @@ func (t *TarantoolRepository) CreatePoll(poll models.Poll) error {
 		return fmt.Errorf("unable to parse struct: %v", err)
 	}
 
-	req := tarantool.NewInsertRequest("polls").Tuple([]interface{}{poll.ID, poll.ChannelID, string(jsonPoll)})
+	req := tarantool.NewInsertRequest("polls").
+		Tuple([]interface{}{poll.ID, poll.ChannelID, string(jsonPoll)})
 
 	_, err = t.tarantoolConn.Do(req).Get()
 	if err != nil {
@@ -64,7 +65,12 @@ func (t *TarantoolRepository) UpdatePoll(poll models.Poll) error {
 		return err
 	}
 
-	req := tarantool.NewUpdateRequest("polls").Index("primary").Key([]interface{}{poll.ID, poll.ChannelID}).Operations(tarantool.NewOperations().Assign(2, string(jsonPoll)))
+	req := tarantool.NewUpdateRequest("polls").
+		Index("primary").
+		Key([]interface{}{poll.ID, poll.ChannelID}).
+		Operations(tarantool.NewOperations().
+			Assign(2, string(jsonPoll)))
+
 	_, err = t.tarantoolConn.Do(req).Get()
 	if err != nil {
 		return err
@@ -74,20 +80,26 @@ func (t *TarantoolRepository) UpdatePoll(poll models.Poll) error {
 }
 
 func (t *TarantoolRepository) DelPoll(poll models.Poll) error {
-	req := tarantool.NewDeleteRequest("polls").Index("primary").Key([]interface{}{poll.ID, poll.ChannelID})
+	req := tarantool.NewDeleteRequest("polls").
+		Index("primary").
+		Key([]interface{}{poll.ID, poll.ChannelID})
 
 	_, err := t.tarantoolConn.Do(req).Get()
 	if err != nil {
-		fmt.Errorf("unable to delete poll: %v", err)
+		return fmt.Errorf("unable to delete poll: %v", err)
 	}
 
 	return nil
 }
 
 func (t *TarantoolRepository) GetPoll(channelId string, pollId string) (models.Poll, error) {
-	req := tarantool.NewSelectRequest("polls").Index("primary").Iterator(tarantool.IterEq).Key([]interface{}{pollId, channelId})
+	req := tarantool.NewSelectRequest("polls").
+		Index("primary").
+		Iterator(tarantool.IterEq).
+		Key([]interface{}{pollId, channelId})
 
 	resp, err := t.tarantoolConn.Do(req).Get()
+
 	if err != nil {
 		return models.Poll{}, fmt.Errorf("get query error: %v", err)
 	}
@@ -98,6 +110,7 @@ func (t *TarantoolRepository) GetPoll(channelId string, pollId string) (models.P
 
 	resp = resp[0].([]interface{})
 	var poll models.Poll
+
 	err = json.Unmarshal([]byte(resp[2].(string)), &poll)
 	if err != nil {
 		return models.Poll{}, fmt.Errorf("unmarshal error: %v", err)

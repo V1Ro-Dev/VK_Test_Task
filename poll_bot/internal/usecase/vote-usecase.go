@@ -37,7 +37,12 @@ func (v *VoteService) Create(post *model.Post) (string, error) {
 		return "", fmt.Errorf("create poll failed: %v", err)
 	}
 
-	return fmt.Sprintf("Successfully created poll. Question: %s. AnswerOptions: %v. PollID: %s", poll.Question, poll.AnswerOptions, poll.ID), nil
+	res := fmt.Sprintf("Successfully created poll\nPollID: %s\nQuestion: %s\nAnswer Options:\n", poll.ID, poll.Question)
+	for _, opt := range poll.AnswerOptions {
+		res += fmt.Sprintf("\t%s\n", opt)
+	}
+
+	return res, nil
 }
 func (v *VoteService) Vote(post *model.Post) (string, error) {
 	if err := utils.ValidateCreateNVote(post); err != nil {
@@ -116,7 +121,7 @@ func (v *VoteService) Del(post *model.Post) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	if err = utils.ValidateDel(poll, post); err != nil {
 		return "", err
 	}
