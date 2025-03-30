@@ -14,7 +14,7 @@ type MatterMost struct {
 
 func LoadConfig(configPath string) (*MatterMost, error) {
 	if configPath == "" {
-		configPath = "/app/deploym/config/matter-most/config.toml"
+		configPath = "/app/deploy/config/matter-most/config.toml"
 	}
 
 	var cfg MatterMost

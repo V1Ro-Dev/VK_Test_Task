@@ -11,7 +11,7 @@ services:
       - "8080:8080"
     volumes:
       - ../poll_bot/config:/app/config  # Монтируем конфиги
-      - ../deploym:/app/deploym
+      - ../deploy:/app/deploy
     networks:
       - mattermost_network
 
@@ -22,7 +22,7 @@ services:
     ports:
       - "3301:3301"
     volumes:
-      - ../deploym/migrations/init.lua:/opt/tarantool/init.lua:ro
+      - ../deploy/migrations/init.lua:/opt/tarantool/init.lua:ro
     command: tarantool /opt/tarantool/init.lua
     networks:
       - mattermost_network
