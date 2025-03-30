@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mattermost/mattermost-server/v6/model"
 
@@ -10,11 +11,9 @@ import (
 )
 
 type VoteRepository interface {
-	GetPollResults(poll models.Poll)
-	EndPoll(poll models.Poll)
-	DelPoll(poll models.Poll)
+	UpdatePoll(poll models.Poll) error
+	DelPoll(poll models.Poll) error
 	CreatePoll(poll models.Poll) error
-	Vote(poll models.Poll)
 	GetPoll(channelId string, id string) (models.Poll, error)
 }
 
@@ -38,21 +37,93 @@ func (v *VoteService) Create(post *model.Post) (string, error) {
 		return "", fmt.Errorf("create poll failed: %v", err)
 	}
 
-	return fmt.Sprintf("Successfully created poll. Question: %s. AnswerOptions: %v", poll.Question, poll.AnswerOptions), nil
+	return fmt.Sprintf("Successfully created poll. Question: %s. AnswerOptions: %v. PollID: %s", poll.Question, poll.AnswerOptions, poll.ID), nil
 }
 func (v *VoteService) Vote(post *model.Post) (string, error) {
 	if err := utils.ValidateCreateNVote(post); err != nil {
 		return "", err
 	}
-	return "", nil
+
+	commands := strings.Fields(post.Message)
+	poll, err := v.voteRepo.GetPoll(post.ChannelId, commands[2])
+	if err != nil {
+		return "", fmt.Errorf("vote failed: %v", err)
+	}
+
+	if err = utils.ValidateVote(poll, post); err != nil {
+		return "", err
+	}
+
+	poll.MemberVotes[post.UserId] = commands[3]
+	if err = v.voteRepo.UpdatePoll(poll); err != nil {
+		return "", fmt.Errorf("vote failed: %v", err)
+	}
+
+	return fmt.Sprintf("You have successfully voted for Poll: %s with Option: %s", commands[2], commands[3]), nil
 }
 func (v *VoteService) CheckResults(post *model.Post) (string, error) {
-	return "", nil
-}
-func (v *VoteService) End(post *model.Post) (string, error) {
+	if err := utils.ValidateEndNDelNRes(post); err != nil {
+		return "", err
+	}
 
-	return "", nil
+	poll, err := v.voteRepo.GetPoll(post.ChannelId, strings.Fields(post.Message)[2])
+	if err != nil {
+		return "", err
+	}
+
+	res := fmt.Sprintf("Vote results \"%s\":\n", poll.Question)
+	for _, answer := range poll.MemberVotes {
+		cnt := 0
+		for _, option := range poll.AnswerOptions {
+			if answer == option {
+				cnt++
+			}
+		}
+		res += fmt.Sprintf(" - %s: %d votes\n", answer, cnt)
+	}
+
+	return res, nil
 }
+
+func (v *VoteService) End(post *model.Post) (string, error) {
+	if err := utils.ValidateEndNDelNRes(post); err != nil {
+		return "", err
+	}
+
+	poll, err := v.voteRepo.GetPoll(post.ChannelId, strings.Fields(post.Message)[2])
+	if err != nil {
+		return "", err
+	}
+
+	if err = utils.ValidateEnd(poll, post); err != nil {
+		return "", err
+	}
+
+	poll.IsActive = false
+	if err = v.voteRepo.UpdatePoll(poll); err != nil {
+		return "", fmt.Errorf("end poll failed: %v", err)
+	}
+
+	return fmt.Sprintf("You have successfully end poll with PollID: %s", poll.ID), nil
+}
+
 func (v *VoteService) Del(post *model.Post) (string, error) {
-	return "", nil
+	if err := utils.ValidateEndNDelNRes(post); err != nil {
+		return "", err
+	}
+
+	poll, err := v.voteRepo.GetPoll(post.ChannelId, strings.Fields(post.Message)[2])
+	if err != nil {
+		return "", err
+	}
+	
+	if err = utils.ValidateDel(poll, post); err != nil {
+		return "", err
+	}
+
+	if err = v.voteRepo.DelPoll(poll); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("You have successfully deleted poll with PollID: %s", poll.ID), nil
 }

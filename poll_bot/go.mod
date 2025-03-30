@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/mattermost/mattermost-server/v6 v6.7.2
 	github.com/tarantool/go-tarantool v1.12.2
+	github.com/tarantool/go-tarantool/v2 v2.3.0
 )
 
 require (
@@ -39,6 +40,7 @@ require (
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
+	github.com/tarantool/go-iproto v1.1.0 // indirect
 	github.com/tarantool/go-openssl v1.1.1 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect

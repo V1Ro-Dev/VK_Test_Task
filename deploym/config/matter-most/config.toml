@@ -1,4 +1,4 @@
 
 MM_TOKEN="axwwboy66jdti85frergrgxi5h"
-MM_SERVER="http://host.docker.internal:8065/"
+MM_SERVER="http://mattermost-app:8065/"
 MM_USERNAME="poll_bot"
