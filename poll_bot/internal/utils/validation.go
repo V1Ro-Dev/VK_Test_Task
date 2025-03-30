@@ -2,10 +2,11 @@ package utils
 
 import (
 	"errors"
-	"poll_bot/internal/models"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/v6/model"
+
+	"poll_bot/internal/models"
 )
 
 func ValidateMessage(message string) bool {

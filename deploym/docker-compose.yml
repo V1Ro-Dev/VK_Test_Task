@@ -19,9 +19,6 @@ services:
     image: tarantool/tarantool:latest
     container_name: tarantool
     restart: always
-    environment:
-      TARANTOOL_USER_NAME: admin
-      TARANTOOL_USER_PASSWORD: secret
     ports:
       - "3301:3301"
     volumes:
