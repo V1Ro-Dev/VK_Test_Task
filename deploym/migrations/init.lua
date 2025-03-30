@@ -1,5 +1,10 @@
 box.cfg{}
 
+if not box.schema.user.exists('test') then
+    box.schema.user.create('test', { password = 'secret' })
+end
+box.schema.user.grant('test', 'read,write,execute', 'universe')
+
 local vote = box.schema.space.create('polls', {
     format = {
         {'id', 'string'},

@@ -23,8 +23,12 @@ func NewTarantoolRepository() *TarantoolRepository {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
+	log.Println("Connecting to tarantool...", tarantoolCfg)
+
 	dialer := tarantool.NetDialer{
-		Address: tarantoolCfg.GetURL(),
+		Address:  tarantoolCfg.GetURL(),
+		User:     tarantoolCfg.GetUser(),
+		Password: tarantoolCfg.GetPass(),
 	}
 	opts := tarantool.Opts{
 		Timeout: time.Second,

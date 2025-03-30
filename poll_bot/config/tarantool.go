@@ -6,7 +6,7 @@ import (
 
 const (
 	backupURL  string = "tarantool:3301"
-	backupUser string = "admin"
+	backupUser string = "test"
 	backupPass string = "secret"
 )
 

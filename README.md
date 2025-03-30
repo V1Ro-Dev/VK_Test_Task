@@ -1,6 +1,16 @@
 # VK Test Task
 Тестовое задание на стажировку VK
 
+## Команды для бота:
+
+```sh
+/poll create        <question>   <option1, option2, ...>
+/poll vote          <poll_id>    <option>
+/poll check_results <poll_id>
+/poll end           <poll_id>
+/poll del           <poll_id>
+```
+
 
 ## Как запускать проект:
 
