@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"fmt"
+
 	"github.com/mattermost/mattermost-server/v6/model"
+
 	"poll_bot/internal/models"
 	"poll_bot/internal/utils"
 )

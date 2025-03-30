@@ -6,16 +6,14 @@ import (
 )
 
 type MatterMost struct {
-	mattermostUserName string `toml:"MM_USERNAME"`
-	mattermostTeamName string `toml:"MM_TEAM_NAME"`
+	MattermostUserName string `toml:"MM_USERNAME"`
 	MattermostToken    string `toml:"MM_TOKEN"`
-	mattermostChannel  string `toml:"MM_CHANNEL"`
-	mattermostServer   string `toml:"MM_SERVER"`
+	MattermostServer   string `toml:"MM_SERVER"`
 }
 
 func LoadConfig(configPath string) (*MatterMost, error) {
 	if configPath == "" {
-		configPath = "../deploy/config/matter-most/config.toml"
+		configPath = "/app/deploym/config/matter-most/config.toml"
 	}
 
 	var cfg MatterMost

@@ -3,8 +3,11 @@ package tarantool
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tarantool/go-tarantool"
 	"log"
+
+	"github.com/tarantool/go-tarantool"
+
+	"poll_bot/config"
 	"poll_bot/internal/models"
 )
 
@@ -13,9 +16,12 @@ type TarantoolRepository struct {
 }
 
 func NewTarantoolRepository() *TarantoolRepository {
-	tarantoolConn, err := tarantool.Connect("127.0.0.1:3301", tarantool.Opts{
-		User: "guest",
-	})
+	tarantoolCfg := config.NewTarantoolConfig()
+
+	tarantoolConn, err := tarantool.Connect(tarantoolCfg.GetURL(),
+		tarantool.Opts{},
+	)
+
 	if err != nil {
 		log.Fatal("tarantool connection error:", err)
 	}
@@ -30,9 +36,12 @@ func (t *TarantoolRepository) CreatePoll(poll models.Poll) error {
 		return fmt.Errorf("unable to parse struct: %v", err)
 	}
 
-	_, err = t.tarantoolConn.Insert("polls", []interface{}{poll.ID, poll.ChannelID, jsonPoll})
+	log.Println(string(jsonPoll))
+
+	_, err = t.tarantoolConn.Insert("polls", []interface{}{poll.ID, poll.ChannelID, string(jsonPoll)})
 	if err != nil {
-		fmt.Println("Insertion error:", err)
+		log.Println("insert poll error:", err)
+		return fmt.Errorf("unable to insert poll: %v", err)
 	}
 
 	return nil

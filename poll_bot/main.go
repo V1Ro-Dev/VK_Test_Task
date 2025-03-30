@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"log"
@@ -8,6 +8,6 @@ import (
 func main() {
 	err := internal.Run()
 	if err != nil {
-		log.Fatal("fail to run")
+		log.Fatal("fail to run", err.Error())
 	}
 }

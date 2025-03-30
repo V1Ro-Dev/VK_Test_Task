@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/mattermost/mattermost-server/v6/model"
 	"strings"
+
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 type Poll struct {

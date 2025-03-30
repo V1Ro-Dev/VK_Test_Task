@@ -3,10 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
+	"strings"
+
 	"github.com/mattermost/mattermost-server/v6/model"
+
 	"poll_bot/config"
 	"poll_bot/internal/utils"
-	"strings"
 )
 
 type PollUseCase interface {
@@ -30,8 +33,9 @@ func NewPollHandler(pollUseCase PollUseCase) *PollHandler {
 func (p *PollHandler) StartListening(bot *config.Bot) {
 	var err error
 	for {
-		bot.MattermostWebSocketClient, err = model.NewWebSocketClient4(bot.MattermostClient.URL, bot.Config.MattermostToken)
+		bot.MattermostWebSocketClient, err = model.NewWebSocketClient4("ws://mattermost-app:8065", bot.MattermostClient.AuthToken)
 		if err != nil {
+			log.Println("websocket connection error", err.Error())
 			return
 		}
 
@@ -46,10 +50,6 @@ func (p *PollHandler) StartListening(bot *config.Bot) {
 }
 
 func (p *PollHandler) HandleWebSocketEvents(bot *config.Bot, event *model.WebSocketEvent) {
-	// Ignore other channels.
-	if event.GetBroadcast().ChannelId != bot.MattermostChannel.Id {
-		return
-	}
 
 	// Ignore other types of events.
 	if event.EventType() != model.WebsocketEventPosted {
@@ -76,6 +76,8 @@ func (p *PollHandler) HandleWebSocketEvents(bot *config.Bot, event *model.WebSoc
 	res := ""
 	var usecaseErr error
 
+	log.Printf("Commands: %v", commands)
+
 	switch commands[1] {
 	case "create":
 		res, usecaseErr = p.pollUseCase.Create(post)
@@ -97,7 +99,7 @@ func (p *PollHandler) HandleWebSocketEvents(bot *config.Bot, event *model.WebSoc
 	}
 
 	if usecaseErr != nil {
-		bot.SendMessage(post.ChannelId, err.Error())
+		bot.SendMessage(post.ChannelId, usecaseErr.Error())
 		return
 	}
 

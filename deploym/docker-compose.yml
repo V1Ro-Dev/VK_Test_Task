@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  go-app:
+    build:
+      context: ..  # Корень проекта (VK_Test_Task)
+      dockerfile: Dockerfile
+    container_name: poll-bot
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../poll_bot/config:/app/config  # Монтируем конфиги
+      - ../deploym:/app/deploym
+    networks:
+      - mattermost_network
+
+  tarantool:
+    image: tarantool/tarantool:latest
+    container_name: tarantool
+    restart: always
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: secret
+    ports:
+      - "3301:3301"
+    volumes:
+      - ../deploym/migrations/init.lua:/opt/tarantool/init.lua:ro
+    command: tarantool /opt/tarantool/init.lua
+    networks:
+      - mattermost_network
+
+networks:
+  mattermost_network:
+    external: true

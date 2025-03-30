@@ -2,8 +2,9 @@ package utils
 
 import (
 	"errors"
-	"github.com/mattermost/mattermost-server/v6/model"
 	"strings"
+
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 func ValidateMessage(message string) bool {
