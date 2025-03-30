@@ -36,7 +36,7 @@ docker network connect mattermost_network mattermost-app
 
 Клонируем репозиторий:
 ```sh
-git clone https://github.com/V1Ro-Dev/VK_Test_Task
+git clone https://github.com/V1Ro-Dev/vkTestTask
 ```
 
 Переходим в папку с конфигом MatterMost'a:

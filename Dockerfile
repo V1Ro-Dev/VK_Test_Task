@@ -1,4 +1,3 @@
-# Используем официальный образ Go как базовый
 FROM golang:1.24 AS builder
 
 WORKDIR /app
@@ -23,7 +22,6 @@ FROM alpine:latest
 
 RUN apk add --no-cache tzdata libc6-compat
 
-# Создаем рабочую директорию
 WORKDIR /app
 
 COPY --from=builder /app/app .
