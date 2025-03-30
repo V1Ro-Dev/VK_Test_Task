@@ -11,6 +11,18 @@
 /poll del           <poll_id>
 ```
 
+## Пример использования:
+```sh
+/poll create test 1 2 3
+
+Successfully created poll
+PollID: po9dzjn3zjrab8rhe9yad5gwfw
+Question: test
+Answer Options:
+    1
+    2
+    3
+```
 
 ## Как запускать проект:
 
@@ -48,8 +60,8 @@ cd deploy
 Где TARANTOOL_URL = имя контейнера с Tarantool + порт
 ```sh
 TARANTOOL_URL=tarantool:3301
-TARANTOOL_USER=admin
-TARANTOOL_PASS=secret
+TARANTOOL_USER=your_user
+TARANTOOL_PASS=your_pass
 ```
 
 Запускаем наше приложение + tarantool в Docker-контейнерах

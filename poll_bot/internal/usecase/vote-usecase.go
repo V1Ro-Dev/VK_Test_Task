@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"poll_bot/pkg/logger"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/v6/model"
@@ -34,7 +35,7 @@ func (v *VoteService) Create(post *model.Post) (string, error) {
 
 	poll := models.CreatePoll(post)
 	if err := v.voteRepo.CreatePoll(poll); err != nil {
-		return "", fmt.Errorf("create poll failed: %v", err)
+		return "", fmt.Errorf("poll creation failed: %v", err)
 	}
 
 	res := fmt.Sprintf("Successfully created poll\nPollID: %s\nQuestion: %s\nAnswer Options:\n", poll.ID, poll.Question)
@@ -42,6 +43,7 @@ func (v *VoteService) Create(post *model.Post) (string, error) {
 		res += fmt.Sprintf("\t%s\n", opt)
 	}
 
+	logger.Info(fmt.Sprintf("Created poll with ID: %s", poll.ID))
 	return res, nil
 }
 func (v *VoteService) Vote(post *model.Post) (string, error) {
@@ -64,6 +66,7 @@ func (v *VoteService) Vote(post *model.Post) (string, error) {
 		return "", fmt.Errorf("vote failed: %v", err)
 	}
 
+	logger.Info(fmt.Sprintf("Vote for Poll with ID: %s and Option: %s was successfuly executed", poll.ID, poll.MemberVotes[post.UserId]))
 	return fmt.Sprintf("You have successfully voted for Poll: %s with Option: %s", commands[2], commands[3]), nil
 }
 func (v *VoteService) CheckResults(post *model.Post) (string, error) {
@@ -87,6 +90,7 @@ func (v *VoteService) CheckResults(post *model.Post) (string, error) {
 		res += fmt.Sprintf(" - %s: %d votes\n", answer, cnt)
 	}
 
+	logger.Info("check_results command was successfully executed")
 	return res, nil
 }
 
@@ -109,6 +113,7 @@ func (v *VoteService) End(post *model.Post) (string, error) {
 		return "", fmt.Errorf("end poll failed: %v", err)
 	}
 
+	logger.Info(fmt.Sprintf("Poll with ID was ended: %s", poll.ID))
 	return fmt.Sprintf("You have successfully end poll with PollID: %s", poll.ID), nil
 }
 
@@ -130,5 +135,6 @@ func (v *VoteService) Del(post *model.Post) (string, error) {
 		return "", err
 	}
 
+	logger.Info(fmt.Sprintf("Poll with ID: %s was deleted", poll.ID))
 	return fmt.Sprintf("You have successfully deleted poll with PollID: %s", poll.ID), nil
 }

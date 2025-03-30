@@ -3,6 +3,7 @@ package tarantool
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 	"poll_bot/config"
 	"poll_bot/internal/models"
+	"poll_bot/pkg/logger"
 )
 
 type TarantoolRepository struct {
@@ -23,7 +25,7 @@ func NewTarantoolRepository() *TarantoolRepository {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	log.Println("Connecting to tarantool...", tarantoolCfg)
+	logger.Info("connecting to tarantool...")
 
 	dialer := tarantool.NetDialer{
 		Address:  tarantoolCfg.GetURL(),
@@ -39,13 +41,16 @@ func NewTarantoolRepository() *TarantoolRepository {
 		log.Fatal("tarantool connection error:", err)
 	}
 
+	logger.Info("successfully connected to tarantool")
+
 	return &TarantoolRepository{tarantoolConn: conn}
 }
 
 func (t *TarantoolRepository) CreatePoll(poll models.Poll) error {
 	jsonPoll, err := json.Marshal(poll)
 	if err != nil {
-		return fmt.Errorf("unable to parse struct: %v", err)
+		logger.Error("unable to parse struct: ", err.Error())
+		return errors.New("wrong poll structure")
 	}
 
 	req := tarantool.NewInsertRequest("polls").
@@ -53,6 +58,7 @@ func (t *TarantoolRepository) CreatePoll(poll models.Poll) error {
 
 	_, err = t.tarantoolConn.Do(req).Get()
 	if err != nil {
+		logger.Error("unable to insert poll: ", err.Error())
 		return fmt.Errorf("unable to create poll: %v", err)
 	}
 
@@ -62,7 +68,8 @@ func (t *TarantoolRepository) CreatePoll(poll models.Poll) error {
 func (t *TarantoolRepository) UpdatePoll(poll models.Poll) error {
 	jsonPoll, err := json.Marshal(poll)
 	if err != nil {
-		return err
+		logger.Error("unable to parse struct: ", err.Error())
+		return errors.New("wrong poll structure")
 	}
 
 	req := tarantool.NewUpdateRequest("polls").
@@ -73,7 +80,8 @@ func (t *TarantoolRepository) UpdatePoll(poll models.Poll) error {
 
 	_, err = t.tarantoolConn.Do(req).Get()
 	if err != nil {
-		return err
+		logger.Error("unable to update poll: ", err.Error())
+		return errors.New("somthing went wrong, try again")
 	}
 
 	return nil
@@ -86,7 +94,8 @@ func (t *TarantoolRepository) DelPoll(poll models.Poll) error {
 
 	_, err := t.tarantoolConn.Do(req).Get()
 	if err != nil {
-		return fmt.Errorf("unable to delete poll: %v", err)
+		logger.Error("unable to delete poll: ", err.Error())
+		return errors.New("unable to delete poll, try again")
 	}
 
 	return nil
@@ -101,11 +110,12 @@ func (t *TarantoolRepository) GetPoll(channelId string, pollId string) (models.P
 	resp, err := t.tarantoolConn.Do(req).Get()
 
 	if err != nil {
-		return models.Poll{}, fmt.Errorf("get query error: %v", err)
+		logger.Error("unable to get poll from db: ", err.Error())
+		return models.Poll{}, errors.New("unable to get poll, please try again")
 	}
 
 	if len(resp) == 0 {
-		return models.Poll{}, fmt.Errorf("poll not found")
+		return models.Poll{}, errors.New("poll not found")
 	}
 
 	resp = resp[0].([]interface{})
@@ -113,7 +123,8 @@ func (t *TarantoolRepository) GetPoll(channelId string, pollId string) (models.P
 
 	err = json.Unmarshal([]byte(resp[2].(string)), &poll)
 	if err != nil {
-		return models.Poll{}, fmt.Errorf("unmarshal error: %v", err)
+		logger.Error("unmarshal error: ", err.Error())
+		return models.Poll{}, errors.New("unable to get poll, please try again")
 	}
 
 	return poll, nil
