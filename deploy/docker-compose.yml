@@ -26,6 +26,8 @@ services:
     command: tarantool /opt/tarantool/init.lua
     networks:
       - mattermost_network
+    env_file:
+      - ../deploy/.env
 
 networks:
   mattermost_network:
