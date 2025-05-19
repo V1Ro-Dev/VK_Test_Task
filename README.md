@@ -1,5 +1,5 @@
-# VK Test Task
-Тестовое задание на стажировку VK
+# MatterMost Poll Bot
+Бот для проведения голосований на open-source платформе - MatterMost
 
 ## Создание бота:
 ```sh
